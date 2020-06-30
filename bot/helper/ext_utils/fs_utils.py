@@ -23,7 +23,7 @@ def start_cleanup():
 
 def clean_all():
     aria2.remove_all(True)
-    shutil.rmtree(DOWNLOAD_DIR)
+    start_cleanup()
 
 
 def exit_clean_up(signal, frame):
