@@ -8,6 +8,9 @@ import telegram.ext as tg
 from dotenv import load_dotenv
 import socket
 
+import psycopg2
+from psycopg2 import Error
+
 socket.setdefaulttimeout(600)
 
 botStartTime = time.time()
@@ -58,14 +61,11 @@ status_reply_dict = {}
 download_dict = {}
 # Stores list of users and chats the bot is authorized to use in
 AUTHORIZED_CHATS = set()
-if os.path.exists('authorized_chats.txt'):
-    with open('authorized_chats.txt', 'r+') as f:
-        lines = f.readlines()
-        for line in lines:
-            #    LOGGER.info(line.split())
-            AUTHORIZED_CHATS.add(int(line.split()[0]))
+SUDO_USERS = set()
+
 try:
     BOT_TOKEN = getConfig('BOT_TOKEN')
+    DB_URI = getConfig('DATABASE_URL')
     parent_id = getConfig('GDRIVE_FOLDER_ID')
     DOWNLOAD_DIR = getConfig('DOWNLOAD_DIR')
     if DOWNLOAD_DIR[-1] != '/' or DOWNLOAD_DIR[-1] != '\\':
@@ -79,6 +79,27 @@ try:
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
+
+try:
+    conn = psycopg2.connect(DB_URI)
+    cur = conn.cursor()
+    sql = "SELECT * from users;"
+    cur.execute(sql)
+    rows = cur.fetchall()  #returns a list ==> (uid, sudo)
+    for row in rows:
+        AUTHORIZED_CHATS.add(row[0])
+        if row[1]:
+            SUDO_USERS.add(row[0])
+    print("Connected to DB")  
+except psycopg2.DatabaseError as error :
+    LOGGER.error(f"Error : {error}")
+    exit(1)
+finally:
+    #closing database connection.
+    if(conn):
+        cur.close()
+        conn.close()
+
 try:
     INDEX_URL = getConfig('INDEX_URL')
     if len(INDEX_URL) == 0:
