@@ -145,8 +145,12 @@ class MirrorListener(listeners.MirrorListeners):
                 if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
                     share_url += '/'
                 buttons.buildbutton("💥Index Link💥", share_url)
-            if self.tag is not None:
-                msg += f'\n\nHey @{self.tag}, your file is uploaded'
+            if self.message.from_user.username:
+                uname = f"@{self.message.from_user.username}"
+            else:
+                uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
+            if uname is not None:
+                msg += f'\n\nHey {uname}, your file is uploaded'
             try:
                 fs_utils.clean_download(download_dict[self.uid].path())
             except FileNotFoundError:
