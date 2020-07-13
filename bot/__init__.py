@@ -91,15 +91,11 @@ try:
         AUTHORIZED_CHATS.add(row[0])
         if row[1]:
             SUDO_USERS.add(row[0])
-    print("Connected to DB")  
-except psycopg2.DatabaseError as error :
-    LOGGER.error(f"Error : {error}")
-    exit(1)
-finally:
-    #closing database connection.
-    if(conn):
-        cur.close()
-        conn.close()
+    cur.close()
+    conn.close()
+except Error as e :
+    LOGGER.error(e)
+    exit(1)        
 
 try:
     INDEX_URL = getConfig('INDEX_URL')
