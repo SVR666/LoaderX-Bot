@@ -319,7 +319,8 @@ class GoogleDriveHelper:
                 buttons = button_builder.ButtonMaker()
                 buttons.buildbutton("⚡Drive Link⚡", self.__G_DRIVE_DIR_BASE_DOWNLOAD_URL.format(dir_id))
                 if INDEX_URL is not None:
-                    url = requests.utils.requote_uri(f'{INDEX_URL}/{meta.get("name")}/')
+                    url_path = requests.utils.quote(f'{meta.get("name")}')
+                    url = f'{INDEX_URL}/{url_path}/'
                     buttons.buildbutton("💥Index Link💥", url)
             else:
                 file = self.copyFile(meta.get('id'), parent_id)
@@ -331,7 +332,8 @@ class GoogleDriveHelper:
                 except TypeError:
                     pass
                 if INDEX_URL is not None:
-                        url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}')
+                        url_path = requests.utils.quote(f'{file.get("name")}')
+                        url = f'{INDEX_URL}/{url_path}'
                         buttons.buildbutton("💥Index Link💥", url)
         except Exception as err:
             if isinstance(err, RetryError):
@@ -459,15 +461,18 @@ class GoogleDriveHelper:
                     msg += f"⁍<code>{file.get('name')}<br>(folder📁)</code><br>" \
                            f"<b><a href='https://drive.google.com/drive/folders/{file.get('id')}'>Drive Link</a></b>"
                     if INDEX_URL is not None:
-                        url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}/')
+                        url_path = requests.utils.quote(f'{file.get("name")}')
+                        url = f'{INDEX_URL}/{url_path}/'
                         msg += f' <b>| <a href="{url}">Index Link</a></b>'
 
                 else:
                     msg += f"⁍<code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size')))})📄</code><br>" \
                            f"<b><a href='https://drive.google.com/uc?id={file.get('id')}&export=download'>Drive Link</a></b>"
                     if INDEX_URL is not None:
-                        url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}')
+                        url_path = requests.utils.quote(f'{file.get("name")}')
+                        url = f'{INDEX_URL}/{url_path}'
                         msg += f' <b>| <a href="{url}">Index Link</a></b>'
+
 
                 msg += '<br><br>'
 
