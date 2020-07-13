@@ -67,6 +67,7 @@ try:
     BOT_TOKEN = getConfig('BOT_TOKEN')
     DB_URI = getConfig('DATABASE_URL')
     parent_id = getConfig('GDRIVE_FOLDER_ID')
+    telegraph_token = getConfig('TELEGRAPH_TOKEN')
     DOWNLOAD_DIR = getConfig('DOWNLOAD_DIR')
     if DOWNLOAD_DIR[-1] != '/' or DOWNLOAD_DIR[-1] != '\\':
         DOWNLOAD_DIR = DOWNLOAD_DIR + '/'

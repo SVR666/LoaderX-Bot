@@ -18,9 +18,10 @@ from tenacity import *
 
 from telegram import InlineKeyboardMarkup
 from bot.helper.telegram_helper import button_builder
+from telegraph import Telegraph
 
 from bot import parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, \
-    USE_SERVICE_ACCOUNTS, download_dict
+    USE_SERVICE_ACCOUNTS, download_dict, telegraph_token
 from bot.helper.ext_utils.bot_utils import *
 from bot.helper.ext_utils.fs_utils import get_mime_type
 
@@ -446,22 +447,43 @@ class GoogleDriveHelper:
                                                includeTeamDriveItems=True,
                                                q=query,
                                                spaces='drive',
-                                               pageSize=20,
+                                               pageSize=100,
                                                fields='files(id, name, mimeType, size)',
                                                orderBy='modifiedTime desc').execute()
-        for file in response.get('files', []):
-            if file.get(
-                    'mimeType') == "application/vnd.google-apps.folder":  # Detect Whether Current Entity is a Folder or File.
-                msg += f"⁍ <a href='https://drive.google.com/drive/folders/{file.get('id')}'>{file.get('name')}" \
-                       f"</a> (folder)"
-                if INDEX_URL is not None:
-                    url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}/')
-                    msg += f' | <a href="{url}"> Index URL</a>'
-            else:
-                msg += f"⁍ <a href='https://drive.google.com/uc?id={file.get('id')}" \
-                       f"&export=download'>{file.get('name')}</a> ({get_readable_file_size(int(file.get('size')))})"
-                if INDEX_URL is not None:
-                    url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}')
-                    msg += f' | <a href="{url}"> Index URL</a>'
-            msg += '\n'
-        return msg
+
+        if response["files"]:
+            msg += f'<h4>Results : {fileName}</h4><br>@LoaderXbot #ProjektX<br><br>'
+
+            for file in response.get('files', []):
+                if file.get('mimeType') == "application/vnd.google-apps.folder":  # Detect Whether Current Entity is a Folder or File.
+                    msg += f"⁍<code>{file.get('name')}<br>(folder📁)</code><br>" \
+                           f"<b><a href='https://drive.google.com/drive/folders/{file.get('id')}'>Drive Link</a></b>"
+                    if INDEX_URL is not None:
+                        url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}/')
+                        msg += f' <b>| <a href="{url}">Index Link</a></b>'
+
+                else:
+                    msg += f"⁍<code>{file.get('name')}<br>({get_readable_file_size(int(file.get('size')))})📄</code><br>" \
+                           f"<b><a href='https://drive.google.com/uc?id={file.get('id')}&export=download'>Drive Link</a></b>"
+                    if INDEX_URL is not None:
+                        url = requests.utils.requote_uri(f'{INDEX_URL}/{file.get("name")}')
+                        msg += f' <b>| <a href="{url}">Index Link</a></b>'
+
+                msg += '<br><br>'
+
+            response = Telegraph(access_token=telegraph_token).create_page(
+                                                    title = 'LoaderX',
+                                                    author_name='svr666',
+                                                    author_url='https://t.me/svr666',
+                                                    html_content=msg
+                                                    )['path']
+
+            msg = f"<b>Search Results For {fileName} 👇</b>"
+            buttons = button_builder.ButtonMaker()   
+            buttons.buildbutton("HERE", f"https://telegra.ph/{response}")
+
+            return msg, InlineKeyboardMarkup(buttons.build_menu(1))
+
+        else :
+            return '', ''
+
