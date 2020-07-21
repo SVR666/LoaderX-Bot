@@ -129,10 +129,8 @@ heroku git:remote -a appname
 ```
 heroku stack:set container
 ```
-- Add heroku postgres database, connect to database and create a table:
-```
-CREATE TABLE users (uid bigint, sudo boolean DEFAULT FALSE)
-```
+- Add database - [check here](https://github.com/SVR666/LoaderX-Bot#adding-database) (only if you are deploying it for the 1st time)
+
 - Add Private Credentials and Config Stuff:
 ```
 git add -f credentials.json token.pickle config.env heroku.yml
@@ -196,3 +194,14 @@ For using your premium accounts in youtube-dl, edit the netrc file (in the root 
 machine host login username password my_youtube_password
 ```
 where host is the name of extractor (eg. youtube, twitch). Multiple accounts of different hosts can be added each separated by a new line
+
+# Adding Database
+- Add Heroku Postgres
+```
+heroku addons:create heroku-postgresql
+```
+- Copy DATABASE_URL value from the heroku app config vars
+```
+python3 create_table.py 
+```
+- Paste the copied value
