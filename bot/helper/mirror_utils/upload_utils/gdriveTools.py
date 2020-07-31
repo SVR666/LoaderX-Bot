@@ -21,14 +21,14 @@ from bot.helper.telegram_helper import button_builder
 from telegraph import Telegraph
 
 from bot import parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, \
-    USE_SERVICE_ACCOUNTS, download_dict, telegraph_token
+    USE_SERVICE_ACCOUNTS, download_dict, telegra_ph
 from bot.helper.ext_utils.bot_utils import *
 from bot.helper.ext_utils.fs_utils import get_mime_type
 
 LOGGER = logging.getLogger(__name__)
 logging.getLogger('googleapiclient.discovery').setLevel(logging.ERROR)
 SERVICE_ACCOUNT_INDEX = 0
-
+TELEGRAPHLIMIT = 95
 
 class GoogleDriveHelper:
     def __init__(self, name=None, listener=None):
@@ -440,6 +440,25 @@ class GoogleDriveHelper:
             str = str.replace(char, '\\'+char)
         return str
 
+    def edit_telegraph(self):
+        nxt_page = 1 
+        prev_page = 0
+        for content in self.telegraph_content :
+            if nxt_page == 1 :
+                content += f'<b><a href="https://telegra.ph/{self.path[nxt_page]}">Next</a></b>'
+                nxt_page += 1
+            else :
+                if prev_page <= self.num_of_path:
+                    content += f'<b><a href="https://telegra.ph/{self.path[prev_page]}">Prev</a></b>'
+                    prev_page += 1
+                if nxt_page < self.num_of_path:
+                    content += f'<b> | <a href="https://telegra.ph/{self.path[nxt_page]}">Next</a></b>'
+                    nxt_page += 1
+            telegra_ph.edit_page(path = self.path[prev_page],
+                                 title = 'LoaderX',
+                                 html_content=content)
+        return
+
     def drive_list(self, fileName):
         msg = ""
         fileName = self.escapes(str(fileName))
@@ -449,11 +468,14 @@ class GoogleDriveHelper:
                                                includeTeamDriveItems=True,
                                                q=query,
                                                spaces='drive',
-                                               pageSize=100,
+                                               pageSize=200,
                                                fields='files(id, name, mimeType, size)',
                                                orderBy='modifiedTime desc').execute()
 
         if response["files"]:
+            content_count = 0
+            self.telegraph_content = []
+            self.path = []
             msg += f'<h4>Results : {fileName}</h4><br>@LoaderXbot #ProjektX<br><br>'
 
             for file in response.get('files', []):
@@ -472,23 +494,30 @@ class GoogleDriveHelper:
                         url_path = requests.utils.quote(f'{file.get("name")}')
                         url = f'{INDEX_URL}/{url_path}'
                         msg += f' <b>| <a href="{url}">Index Link</a></b>'
-
-
                 msg += '<br><br>'
+                content_count += 1
+                if content_count == TELEGRAPHLIMIT :
+                    self.telegraph_content.append(msg)
+                    msg = ""
+                    content_count = 0
 
-            response = Telegraph(access_token=telegraph_token).create_page(
-                                                    title = 'LoaderX',
-                                                    author_name='svr666',
-                                                    author_url='https://t.me/svr666',
-                                                    html_content=msg
-                                                    )['path']
+            if msg != '':
+                self.telegraph_content.append(msg)
+
+            for content in self.telegraph_content :
+                self.path.append(telegra_ph.create_page(title = 'LoaderX',
+                                                html_content=content )['path'])
+
+            self.num_of_path = len(self.path)      
+            if self.num_of_path > 1:
+                self.edit_telegraph()
 
             msg = f"<b>Search Results For {fileName} 👇</b>"
             buttons = button_builder.ButtonMaker()   
-            buttons.buildbutton("HERE", f"https://telegra.ph/{response}")
+            buttons.buildbutton("HERE", f"https://telegra.ph/{self.path[0]}")
 
             return msg, InlineKeyboardMarkup(buttons.build_menu(1))
 
         else :
-            return '', ''
+            return "No Result Found :(", None
 
