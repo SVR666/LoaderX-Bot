@@ -23,7 +23,7 @@ Deploying is pretty much straight forward and is divided into several steps as f
 
 - Clone this repo:
 ```
-git clone https://github.com/lzzy12/python-aria-mirror-bot mirror-bot/
+git clone https://github.com/SVR666/LoaderX-Bot mirror-bot/
 cd mirror-bot
 ```
 - Install dependencies for running setup scripts:
@@ -120,14 +120,6 @@ heroku ps:scale worker=0
 ```
 ```
 heroku ps:scale worker=1	 	
-```
-Heroku-Note: Doing authorizations ( /authorize command ) through telegram wont be permanent as heroku uses ephemeral filesystem. They will be reset on each dyno boot. As a workaround you can:
-- Make a file authorized_chats.txt and write the user names and chat_id of you want to authorize, each separated by new line
-- Then force add authorized_chats.txt to git and push it to heroku
-```
-git add authorized_chats.txt -f
-git commit -asm "Added hardcoded authorized_chats.txt"
-git push heroku heroku:master
 ```
 
 # Using service accounts for uploading to avoid user rate limit
