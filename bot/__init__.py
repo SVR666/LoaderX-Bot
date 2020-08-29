@@ -7,6 +7,8 @@ import aria2p
 import telegram.ext as tg
 from dotenv import load_dotenv
 import socket
+import faulthandler
+faulthandler.enable()
 
 import psycopg2
 from psycopg2 import Error
