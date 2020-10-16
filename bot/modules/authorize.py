@@ -119,7 +119,10 @@ def removeSudo(update,context):
 
 @run_async
 def sendAuthChats(update,context):
-    sendMessage(f'Authorized Chats are : {AUTHORIZED_CHATS.__str__()}\nSudo Users are : {SUDO_USERS}', context.bot, update)
+    user = sudo = ''
+    user += '\n'.join(str(id) for id in AUTHORIZED_CHATS)
+    sudo += '\n'.join(str(id) for id in SUDO_USERS)
+    sendMessage(f'<b><u>Authorized Chats</u></b>\n{user}\n<b><u>Sudo Users</u></b>\n{sudo}', context.bot, update)
 
 
 send_auth_handler = CommandHandler(command=BotCommands.AuthorizedUsersCommand, callback=sendAuthChats,
