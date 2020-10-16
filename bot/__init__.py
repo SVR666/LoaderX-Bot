@@ -24,6 +24,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     handlers=[logging.FileHandler('log.txt'), logging.StreamHandler()],
                     level=logging.INFO)
 
+LOGGER = logging.getLogger(__name__)
+
 load_dotenv('config.env')
 
 Interval = []
@@ -32,8 +34,17 @@ Interval = []
 def getConfig(name: str):
     return os.environ[name]
 
-
-LOGGER = logging.getLogger(__name__)
+def mktable():
+    try:
+        conn = psycopg2.connect(DB_URI)
+        cur = conn.cursor()
+        sql = "CREATE TABLE users (uid bigint, sudo boolean DEFAULT FALSE);"
+        cur.execute(sql)
+        conn.commit()
+        LOGGER.info("Table Created!")
+    except Error as e:
+        LOGGER.error(e)
+        exit(1)
 
 try:
     if bool(getConfig('_____REMOVE_THIS_LINE_____')):
@@ -93,11 +104,15 @@ try:
         AUTHORIZED_CHATS.add(row[0])
         if row[1]:
             SUDO_USERS.add(row[0])
+except Error as e:
+    if 'relation "users" does not exist' in str(e):
+        mktable()
+    else:
+        LOGGER.error(e)
+        exit(1)
+finally:
     cur.close()
-    conn.close()
-except Error as e :
-    LOGGER.error(e)
-    exit(1)        
+    conn.close()     
 
 try:
     INDEX_URL = getConfig('INDEX_URL')
