@@ -59,6 +59,10 @@ python3 telegraph_token.py
 ```
 python3 generate_string_session.py
 ```
+- **MEGA_API_KEY**: Mega.nz api key to mirror mega.nz links. Get it from [Mega SDK Page](https://mega.nz/sdk)
+- **MEGA_EMAIL_ID**: Your email id you used to sign up on mega.nz for using premium accounts (Leave th)
+- **MEGA_PASSWORD**: Your password for your mega.nz account 
+
 Note: You can limit maximum concurrent downloads by changing the value of MAX_CONCURRENT_DOWNLOADS in aria.sh. By default, it's set to 2
  
 ## Getting Google OAuth API credential file
@@ -66,7 +70,7 @@ Note: You can limit maximum concurrent downloads by changing the value of MAX_CO
 - Visit the [Google Cloud Console](https://console.developers.google.com/apis/credentials)
 - Go to the OAuth Consent tab, fill it, and save.
 - Go to the Credentials tab and click Create Credentials -> OAuth Client ID
-- Choose Other and Create.
+- Choose Desktop and Create.
 - Use the download button to download your credentials.
 - Move that file to the root of mirror-bot, and rename it to credentials.json
 - Visit [Google API page](https://console.developers.google.com/apis/library)
