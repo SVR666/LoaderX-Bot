@@ -63,20 +63,23 @@ def getDownloadByGid(gid):
     with download_dict_lock:
         for dl in download_dict.values():
             status = dl.status()
-            if status != MirrorStatus.STATUS_UPLOADING and status != MirrorStatus.STATUS_ARCHIVING\
-                    and status != MirrorStatus.STATUS_EXTRACTING:
-                if dl.gid() == gid:
-                    return dl
+            if (
+                status
+                not in [
+                    MirrorStatus.STATUS_UPLOADING,
+                    MirrorStatus.STATUS_ARCHIVING,
+                    MirrorStatus.STATUS_EXTRACTING,
+                ]
+                and dl.gid() == gid
+            ):
+                return dl
     return None
 
 
 def get_progress_bar_string(status):
     completed = status.processed_bytes() / 8
     total = status.size_raw() / 8
-    if total == 0:
-        p = 0
-    else:
-        p = round(completed * 100 / total)
+    p = 0 if total == 0 else round(completed * 100 / total)
     p = min(max(p, 0), 100)
     cFull = p // 8
     cPart = p % 8 - 1
@@ -94,7 +97,10 @@ def get_readable_message():
         for download in list(download_dict.values()):
             msg += f"<b>FileName :</b> <i>{download.name()}</i> \n\n<b>Status : </b> "
             msg += download.status()
-            if download.status() != MirrorStatus.STATUS_ARCHIVING and download.status() != MirrorStatus.STATUS_EXTRACTING:
+            if download.status() not in [
+                MirrorStatus.STATUS_ARCHIVING,
+                MirrorStatus.STATUS_EXTRACTING,
+            ]:
                 msg += f"\n\n<code>{get_progress_bar_string(download)} {download.progress()}</code>" \
                        f"\n\n<b>Progress :</b> {get_readable_file_size(download.processed_bytes())}" \
                        f"\n\n<b>Size :</b> {download.size()}" \
@@ -129,16 +135,12 @@ def get_readable_time(seconds: int) -> str:
 
 def is_url(url: str):
     url = re.findall(URL_REGEX, url)
-    if url:
-        return True
-    return False
+    return bool(url)
 
 
 def is_magnet(url: str):
     magnet = re.findall(MAGNET_REGEX, url)
-    if magnet:
-        return True
-    return False
+    return bool(magnet)
 
 
 def is_mega_link(url: str):
