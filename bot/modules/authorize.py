@@ -19,22 +19,21 @@ def authorize(update,context):
             msg = DbManger().db_auth(chat_id)
         else:
             msg = 'User already authorized'
-    else:
-        if reply_message is None:
-            # Trying to authorize a chat
-            chat_id = update.effective_chat.id
-            if chat_id not in AUTHORIZED_CHATS:
-                msg = DbManger().db_auth(chat_id)
-            else:
-                msg = 'Already authorized chat'
-
+    elif reply_message is None:
+        # Trying to authorize a chat
+        chat_id = update.effective_chat.id
+        if chat_id not in AUTHORIZED_CHATS:
+            msg = DbManger().db_auth(chat_id)
         else:
-            # Trying to authorize someone in specific
-            user_id = reply_message.from_user.id
-            if user_id not in AUTHORIZED_CHATS:
-                msg = DbManger().db_auth(user_id)
-            else:
-                msg = 'User already authorized'
+            msg = 'Already authorized chat'
+
+    else:
+        # Trying to authorize someone in specific
+        user_id = reply_message.from_user.id
+        if user_id not in AUTHORIZED_CHATS:
+            msg = DbManger().db_auth(user_id)
+        else:
+            msg = 'User already authorized'
     sendMessage(msg, context.bot, update)
 
 
@@ -50,21 +49,20 @@ def unauthorize(update,context):
             msg = DbManger().db_unauth(chat_id)
         else:
             msg = 'User already unauthorized'
-    else:
-        if reply_message is None:
-            # Trying to unauthorize a chat
-            chat_id = update.effective_chat.id
-            if chat_id in AUTHORIZED_CHATS:
-                msg = DbManger().db_unauth(chat_id)
-            else:
-                msg = 'Already unauthorized chat'
+    elif reply_message is None:
+        # Trying to unauthorize a chat
+        chat_id = update.effective_chat.id
+        if chat_id in AUTHORIZED_CHATS:
+            msg = DbManger().db_unauth(chat_id)
         else:
-            # Trying to authorize someone in specific
-            user_id = reply_message.from_user.id
-            if user_id in AUTHORIZED_CHATS:
-                msg = DbManger().db_unauth(user_id)
-            else:
-                msg = 'User already unauthorized'
+            msg = 'Already unauthorized chat'
+    else:
+        # Trying to authorize someone in specific
+        user_id = reply_message.from_user.id
+        if user_id in AUTHORIZED_CHATS:
+            msg = DbManger().db_unauth(user_id)
+        else:
+            msg = 'User already unauthorized'
     sendMessage(msg, context.bot, update)
 
 
@@ -80,16 +78,15 @@ def addSudo(update,context):
             msg = DbManger().db_addsudo(chat_id)
         else:
             msg = 'Already Sudo'
+    elif reply_message is None:
+        msg = "Give ID or Reply To message of whom you want to Promote"
     else:
-        if reply_message is None:
-            msg = "Give ID or Reply To message of whom you want to Promote"
+        # Trying to authorize someone in specific
+        user_id = reply_message.from_user.id
+        if user_id not in SUDO_USERS:
+            msg = DbManger().db_addsudo(user_id)
         else:
-            # Trying to authorize someone in specific
-            user_id = reply_message.from_user.id
-            if user_id not in SUDO_USERS:
-                msg = DbManger().db_addsudo(user_id)
-            else:
-                msg = 'Already Sudo'
+            msg = 'Already Sudo'
     sendMessage(msg, context.bot, update)
 
 
@@ -98,22 +95,15 @@ def removeSudo(update,context):
     reply_message = None
     message_ = None
     reply_message = update.message.reply_to_message
-    message_ = update.message.text.split(' ') 
+    message_ = update.message.text.split(' ')
     if len(message_) == 2:
         chat_id = int(message_[1])
-        if chat_id in SUDO_USERS:
-            msg = DbManger().db_rmsudo(chat_id)
-        else:
-            msg = 'Not a Sudo'
+        msg = DbManger().db_rmsudo(chat_id) if chat_id in SUDO_USERS else 'Not a Sudo'
+    elif reply_message is None:
+        msg = "Give ID or Reply To message of whom you want to remove from Sudo"
     else:
-        if reply_message is None:
-            msg = "Give ID or Reply To message of whom you want to remove from Sudo"
-        else:
-            user_id = reply_message.from_user.id
-            if user_id in SUDO_USERS:
-                msg = DbManger().db_rmsudo(user_id)
-            else:
-                msg = 'Not a Sudo'
+        user_id = reply_message.from_user.id
+        msg = DbManger().db_rmsudo(user_id) if user_id in SUDO_USERS else 'Not a Sudo'
     sendMessage(msg, context.bot, update)
 
 
